@@ -37,3 +37,6 @@ The Real-Time Flight Tracker utilizes the Mapbox GL JS library to set up an inte
 
 
 ## Screenshots
+
+![Screenshot (2)](https://github.com/jwanhussein151044078/flight-tracker-simulator/assets/32716340/ab6e3392-f70e-4b00-8f86-8134d49f9248)
+![Screenshot (6)](https://github.com/jwanhussein151044078/flight-tracker-simulator/assets/32716340/0411fb74-94bc-4a8d-8dd2-1b8ad0500c67)
