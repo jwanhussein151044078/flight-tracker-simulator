@@ -1,0 +1,68 @@
+.mapContainer{
+    width: 100%; 
+    height: 100vh;
+}
+
+.popupContainer{
+    width: 400px !important;
+    height: 60vh;
+    position: absolute;
+    bottom: 10px ;
+    right: 10px;
+    background: rgba(177, 177, 177, 0.801);
+    border-radius: 8px;
+    animation-name: slideIn;
+    animation-duration: .2s;
+    animation-timing-function: ease-in-out;
+    padding: 0px !important;
+}
+
+
+
+.padding-20 {
+    padding: 4px;
+}
+  
+.card {
+    min-width: 275px;
+}
+  
+.large {
+    width: 144px;
+    height: 144px;
+}
+  
+.paper {
+    padding: 10px;
+    text-align: center;
+}
+  
+.pos {
+    margin-bottom: 5px;
+}
+
+.header{
+    height: 6vh;
+}
+.listContainer{
+    height: 48vh ;
+}
+.buttonContainer{
+    height: 6vh ;
+}
+
+.overflow-auto{
+    height: 80%;
+    overflow-y: auto;
+}
+.hegiht-100{
+    height: 100%;
+}
+@keyframes slideIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
