@@ -19,7 +19,8 @@ export const flights = {
         capacity : '555',
         pilot: 'Alexander Martinez',
         destination: 'Atatürk Airport, Istanbul',
-        speed : '550'
+        speed : '550',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',
@@ -36,7 +37,8 @@ export const flights = {
         capacity : '552 ',
         pilot: 'Mia Garcia',
         destination: 'Atatürk Airport, Istanbul',
-        speed : '550'
+        speed : '550',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',
@@ -54,7 +56,8 @@ export const flights = {
         capacity : '123',
         pilot: 'Benjamin Anderson',
         destination: 'Sabiha Gökçen Airport, Istanbul',
-        speed : '550'
+        speed : '550',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',
@@ -72,7 +75,8 @@ export const flights = {
         capacity : '321',
         pilot: 'Ava Thompson',
         destination: 'Barcelona–El Prat Airport, Barcelona',
-        speed : '530'
+        speed : '530',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',
@@ -90,7 +94,8 @@ export const flights = {
         capacity : '333',
         pilot: 'Ethan Wilson',
         destination: 'Charles de Gaulle Airport, Paris',
-        speed : '540'
+        speed : '540',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',
@@ -108,7 +113,8 @@ export const flights = {
         capacity : '355',
         pilot: 'Sophia Rodriguez',
         destination: 'Amsterdam Airport Schiphol, Amsterdam',
-        speed : '770'
+        speed : '770',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',
@@ -126,7 +132,8 @@ export const flights = {
         capacity : '522',
         pilot: 'William Davis',
         destination: 'Amsterdam Airport Schiphol, Amsterdam',
-        speed : '880'
+        speed : '880',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',
@@ -144,7 +151,8 @@ export const flights = {
         capacity : '453',
         pilot: 'Olivia Brown',
         destination: 'Istanbul Airport, Istanbul',
-        speed : '720'
+        speed : '720',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',
@@ -162,7 +170,8 @@ export const flights = {
         capacity : '258',
         pilot: 'Daniel Martinez',
         destination: 'Istanbul Airport, Istanbul',
-        speed : '650'
+        speed : '650',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',
@@ -180,7 +189,8 @@ export const flights = {
         capacity : '444',
         pilot: 'Emily Johnson',
         destination: 'Sabiha Gökçen Airport, Istanbul',
-        speed : '560'
+        speed : '560',
+        path_ind : 0
       },
       geometry: {
         type: 'Point',

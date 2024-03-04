@@ -89,8 +89,8 @@ function PopUp(props){
                             </CardContent>
                         </Card>
                     </Grid>
-                    <Grid item xs={12} sx ={{height:'5%'}}>
-                        <Button color='error' variant="contained" startIcon={<CloseIcon />} onClick={onClickClose}>
+                    <Grid item xs={12} className='buttonContainer'>
+                        <Button fullWidth color='error' variant="contained" startIcon={<CloseIcon />} onClick={onClickClose}>
                             Close
                         </Button>    
                     </Grid>

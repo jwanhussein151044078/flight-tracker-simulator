@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { addFlightsToMap, addRoutesToMap, addTrailsToMap, initializeMap, removeMap, updateFlightss } from '../../Services/Map/MapServices';
+import { addFlightsToMap, addRoutesToMap, addTrailsToMap, initializeMap, removeMap, updateFlightsLocation } from '../../Services/Map/MapServices';
 import { connect } from 'react-redux';
 import { updateFlights } from '../../redux';
 import './Style.css';
@@ -8,16 +8,13 @@ import PopUp from './PopUp';
 function Map(props) {
     const mapContainer = useRef(null);
     const map = useRef(null);
-    const counter = useRef(0);
     const [selectedFeature,setSelectedFeature] = useState(null);
-    useEffect(()=>{
-      if(props.flights){
-        updateFlightss(map.current,props.flights,'flights');
-      }
-    },[props.flights])
-    useEffect(() => {
-        let interval = null;
-        map.current = initializeMap(mapContainer,{style : props.mapState.style});
+    const initMap=()=>{
+      try{
+        map.current = initializeMap(mapContainer,{
+          style : props.mapState.style,
+          accessToken:process.env.REACT_APP_MAPBOX_TOKEN
+        });
         map.current.on('load',()=>{
           map.current.flyTo({
             center: props.mapState.center,
@@ -36,20 +33,30 @@ function Map(props) {
           map.current.flyTo({
               center: e.features[0].geometry.coordinates
           });
-          console.log(e.features[0]);
           let ind = props.flights.features.findIndex((d)=> d.id == e.features[0].id);
           setSelectedFeature(ind);
 
         });
-        interval = setInterval(() => {
+      }catch(error){
+        console.log(error);
+      }
+    }
+    useEffect(()=>{
+      if(props.flights){
+        updateFlightsLocation(map.current,props.flights,'flights');
+      }
+    },[props.flights])
+    useEffect(() => {
+        initMap();
+        let interval = setInterval(() => {
             let flights = {...props.flights};
             flights.features.forEach((feature)=>{
               let path = props.routes.features.find((d)=> d.properties.id == feature.properties.path_id);
-              if(path && counter.current < path.geometry.coordinates.length){
-                feature.geometry.coordinates = path.geometry.coordinates[counter.current]
+              if(path && feature.properties.path_ind < path.geometry.coordinates.length){
+                feature.geometry.coordinates = path.geometry.coordinates[feature.properties.path_ind]
               }
+              feature.properties.path_ind++;
             });
-            counter.current += 1;
             props.updateFlights(flights);
         }, 1000);
         return () => {

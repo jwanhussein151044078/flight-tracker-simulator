@@ -9,7 +9,7 @@
     position: absolute;
     bottom: 10px ;
     right: 10px;
-    background: rgba(177, 177, 177, 0.801);
+    background: rgba(85, 85, 85, 0.801);
     border-radius: 8px;
     animation-name: slideIn;
     animation-duration: .2s;
