@@ -8,7 +8,7 @@ This project is a real-time flight tracker built using Mapbox GL JS. It displays
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [License](#license)
+- [Screenshots](#screenshots)
 
 ## Description
 
