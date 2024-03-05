@@ -4,7 +4,6 @@ import * as turf from '@turf/turf';
 let MAP = null;
 export const initializeMap = (containerRef,options) => {
     if(!MAP){
-        console.log(options)
         MAP = new mapboxgl.Map({
             accessToken : options.accessToken,
             container: containerRef.current,

@@ -1,9 +1,11 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { addFlightsToMap, addRoutesToMap, addTrailsToMap, initializeMap, removeMap, updateFlightsLocation } from '../../Services/Map/MapServices';
 import { connect } from 'react-redux';
-import { updateFlights } from '../../redux';
+import { fetchMapState, updateFlights } from '../../redux';
 import './Style.css';
 import PopUp from './PopUp';
+import { mapState } from '../../redux/initialStates';
+import Loading from '../Loading/Loading';
 
 function Map(props) {
     const mapContainer = useRef(null);
@@ -12,13 +14,13 @@ function Map(props) {
     const initMap=()=>{
       try{
         map.current = initializeMap(mapContainer,{
-          style : props.mapState.style,
+          style : props.mapState.mapSpecs.style,
           accessToken:process.env.REACT_APP_MAPBOX_TOKEN
         });
         map.current.on('load',()=>{
           map.current.flyTo({
-            center: props.mapState.center,
-            zoom: props.mapState.zoom,
+            center: props.mapState.mapSpecs.center.coordinates,
+            zoom: props.mapState.mapSpecs.zoom,
             speed: 3,
             curve: 1,
           });
@@ -46,31 +48,50 @@ function Map(props) {
         updateFlightsLocation(map.current,props.flights,'flights');
       }
     },[props.flights])
-    useEffect(() => {
+    // useEffect(() => {
+    //     initMap();
+    //     let interval = setInterval(() => {
+    //         let flights = {...props.flights};
+    //         flights.features.forEach((feature)=>{
+    //           let path = props.routes.features.find((d)=> d.properties.id == feature.properties.path_id);
+    //           if(path && feature.properties.path_ind < path.geometry.coordinates.length){
+    //             feature.geometry.coordinates = path.geometry.coordinates[feature.properties.path_ind]
+    //           }
+    //           feature.properties.path_ind++;
+    //         });
+    //         props.updateFlights(flights);
+    //     }, 1000);
+    //     return () => {
+    //         removeMap()
+    //         if(interval){clearInterval(interval);}
+    //     };
+    // }, []);
+    useEffect(()=>{
+      console.log(props)
+      console.log(props.mapState && !props.mapState.loading && !props.mapState.error);
+      if(props.mapState && !props.mapState.loading && !props.mapState.error){
         initMap();
-        let interval = setInterval(() => {
-            let flights = {...props.flights};
-            flights.features.forEach((feature)=>{
-              let path = props.routes.features.find((d)=> d.properties.id == feature.properties.path_id);
-              if(path && feature.properties.path_ind < path.geometry.coordinates.length){
-                feature.geometry.coordinates = path.geometry.coordinates[feature.properties.path_ind]
-              }
-              feature.properties.path_ind++;
-            });
-            props.updateFlights(flights);
-        }, 1000);
-        return () => {
-            removeMap()
-            if(interval){clearInterval(interval);}
-        };
-    }, []);
-    return (<div style={{overflow:'hidden'}}>
-      <div className='mapContainer' ref={mapContainer} />
-      <PopUp
-        flightId = {selectedFeature}
-        onClose = {()=>setSelectedFeature(null)}
-      />  
-    </div>);
+      } 
+      return()=>{
+        removeMap()
+      };
+    },[props.mapState]);
+    useEffect(()=>{
+      props.fetchMapState();
+      return()=>{};
+    },[]);
+    return (<>
+      {!props.mapState.loading ?
+        <div>
+          <div className='mapContainer' ref={mapContainer} />
+          <PopUp
+            flightId = {selectedFeature}
+            onClose = {()=>setSelectedFeature(null)}
+          />
+        </div>
+        :<Loading/>
+      }  
+    </>);
 }
 
 const mapStateToProps = (state) => {
@@ -82,7 +103,8 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = dispatch => {
   return {
-    updateFlights: (flights) => {dispatch(updateFlights(flights))},
+    updateFlights: (flights) => dispatch(updateFlights(flights)),
+    fetchMapState: ()=> dispatch(fetchMapState())
   };
 };
 

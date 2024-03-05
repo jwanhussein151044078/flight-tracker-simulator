@@ -1,7 +1,9 @@
 export const mapState ={
-    style: 'mapbox://styles/mapbox/standard',
-    center: [28.9784, 41.0082 ],
-    zoom: 8.5
+    loading : true ,
+    mapSpecs : {},
+    // style: 'mapbox://styles/mapbox/standard',
+    // center: [28.9784, 41.0082 ],
+    // zoom: 8.5
   
 }
 
