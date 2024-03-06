@@ -1,7 +1,7 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { addFlightsToMap, addRoutesToMap, addTrailsToMap, initializeMap, removeMap, updateFlightsLocation } from '../../Services/Map/MapServices';
 import { connect } from 'react-redux';
-import { fetchMapState, updateFlights } from '../../redux';
+import { fetchMapState, fetchRoutesData, updateFlights } from '../../redux';
 import './Style.css';
 import PopUp from './PopUp';
 import { mapState } from '../../redux/initialStates';
@@ -11,6 +11,7 @@ function Map(props) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [selectedFeature,setSelectedFeature] = useState(null);
+    
     const initMap=()=>{
       try{
         map.current = initializeMap(mapContainer,{
@@ -24,7 +25,8 @@ function Map(props) {
             speed: 3,
             curve: 1,
           });
-          addRoutesToMap(map.current,props.routes);
+          props.fetchRoutes();
+          //addRoutesToMap(map.current,props.routes);
           addFlightsToMap(map.current,props.flights,'flights');
           addTrailsToMap(map.current,{
             "type": "FeatureCollection",
@@ -67,8 +69,10 @@ function Map(props) {
     //     };
     // }, []);
     useEffect(()=>{
-      console.log(props)
-      console.log(props.mapState && !props.mapState.loading && !props.mapState.error);
+      addRoutesToMap(map.current,props.routes);
+    },[props.routes]);
+
+    useEffect(()=>{
       if(props.mapState && !props.mapState.loading && !props.mapState.error){
         initMap();
       } 
@@ -76,6 +80,7 @@ function Map(props) {
         removeMap()
       };
     },[props.mapState]);
+
     useEffect(()=>{
       props.fetchMapState();
       return()=>{};
@@ -104,7 +109,8 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => {
   return {
     updateFlights: (flights) => dispatch(updateFlights(flights)),
-    fetchMapState: ()=> dispatch(fetchMapState())
+    fetchMapState: ()=> dispatch(fetchMapState()),
+    fetchRoutes  : ()=> dispatch(fetchRoutesData())
   };
 };
 

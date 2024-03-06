@@ -14,6 +14,8 @@ app.use(cors(corsOptions));
 app.use(express.json({limit: '200mb'}));
 
 app.use('/map/specs', require('./routes/mapSpecsRoutes'));
+app.use('/routes', require('./routes/routesRoutes'));
+
 
 app.use(errorHandler);
 

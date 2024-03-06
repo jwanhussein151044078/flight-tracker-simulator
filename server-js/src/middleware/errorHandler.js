@@ -4,6 +4,7 @@ const errorHandler = (err, req, res, next) => {
   switch (statusCode) {
     case 500:
       res.json({
+        status:false,
         title: "ERROR",
         message: err.message,
         stackTrace: err.stack,
