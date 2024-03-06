@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
         },
         center: {
-          type: DataTypes.GEOMETRY('POINT',3857),
+          type: DataTypes.GEOMETRY('POINT',4326),
           allowNull: false,
         },
         style: {
