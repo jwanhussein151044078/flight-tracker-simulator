@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
   }
   routes.init({
     route: {
-      type: DataTypes.GEOMETRY('LINESTRING',4326),
+      type: DataTypes.GEOGRAPHY('LINESTRING',4326),
       allowNull: false,
     },
   }, {

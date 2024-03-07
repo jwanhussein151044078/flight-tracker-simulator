@@ -10,7 +10,7 @@ module.exports = {
         type: DataTypes.INTEGER
       },
       trail: {
-        type: DataTypes.GEOMETRY('LINESTRING',4326),
+        type: DataTypes.GEOGRAPHY('LINESTRING',4326),
       },
       flight_id: {
         type: DataTypes.INTEGER,

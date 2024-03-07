@@ -10,7 +10,7 @@ module.exports = {
         type: DataTypes.INTEGER
       },
       coordinates: {
-        type: DataTypes.GEOMETRY('POINT',4326),
+        type: DataTypes.GEOGRAPHY('POINT',4326),
         allowNull: false,
       },
       route_id: {
@@ -41,6 +41,10 @@ module.exports = {
       },
       speed:{
         type: DataTypes.DOUBLE,
+      },
+      bearings:{
+        type: DataTypes.DOUBLE,
+        defaultValue: 0
       }
     },{schema:'flight_tracker'});
   },

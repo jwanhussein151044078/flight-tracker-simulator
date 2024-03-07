@@ -8,8 +8,7 @@ function App(props) {
     <Provider store={store}>
       <div className="App">
         <Map/>
-
-    </div>
+      </div>
     </Provider>
     
   );

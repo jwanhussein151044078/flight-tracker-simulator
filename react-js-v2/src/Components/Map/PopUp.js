@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   Card,
   CardContent,
   Typography,
   Grid,
-  Avatar,
   Divider,
   List,
   ListItem,
@@ -13,24 +12,28 @@ import {
   ListItemText,
   Paper,
   Container,
-  IconButton,
   Button,
 } from '@mui/material';
 import FlightIcon from '@mui/icons-material/Flight';
 import PersonIcon from '@mui/icons-material/Person';
-import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import CloseIcon from '@mui/icons-material/Close';
 import FlightLandIcon from '@mui/icons-material/FlightLand';
 import SpeedIcon from '@mui/icons-material/Speed';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import { connect } from 'react-redux';
+import ExploreIcon from '@mui/icons-material/Explore';
 
 function PopUp(props){
+    const [flight,setFlight] = useState({});
     const onClickClose=()=>{
         if(props.onClose){
             props.onClose();
         }
     }
+    useEffect(()=>{
+        setFlight(props.flights.features.find((flight)=> flight.properties.id == props.flightId));
+        return()=>{};
+    },[props.flightId,props.flights]);
     return (<>
         {(props.flightId || props.flightId == 0) &&
         <Container className='popupContainer'>
@@ -39,7 +42,7 @@ function PopUp(props){
                     <Grid item xs={12} className='header'>
                         <Paper className="paper">
                             <Typography variant="h5" >
-                                {props.flights.features[props.flightId].properties.name}
+                                {flight?.properties?.name}
                             </Typography>
                         </Paper>
                     </Grid>
@@ -47,10 +50,10 @@ function PopUp(props){
                         <Card   Card className="card hegiht-100">
                             <CardContent className="hegiht-100">
                                 <Typography variant="h5" component="h2">
-                                    {props.flights.features[props.flightId].properties.aircraft_model}
+                                    {flight?.properties?.aircraft_model}
                                 </Typography>
                                 <Typography className="" color="textSecondary">
-                                    Passenger Airliner
+                                    {flight?.properties?.aircraft_type}
                                 </Typography>
                                 <Divider />
                                 <List className='overflow-auto'>
@@ -58,33 +61,38 @@ function PopUp(props){
                                         <ListItemIcon>
                                             <FlightIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary={`Capacity: ${props.flights.features[props.flightId].properties.capacity || 0} passengers`} />
+                                        <ListItemText primary={`Capacity: ${flight?.properties?.capacity || 0} passengers`} />
                                     </ListItem>
-                                        <ListItem>
+                                    <ListItem>
                                         <ListItemIcon>
                                             <PersonIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary={`Pilot: ${props.flights.features[props.flightId].properties.pilot || ''}`} />
+                                        <ListItemText primary={`Pilot: ${flight?.properties?.pilot || ''}`} />
                                     </ListItem>
-                                        <ListItem>
+                                    <ListItem>
                                         <ListItemIcon>
                                             <FlightLandIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary={props.flights.features[props.flightId].properties.destination} />
+                                        <ListItemText primary={flight?.properties?.destination} />
                                     </ListItem>
-                                        <ListItem>
+                                    <ListItem>
                                         <ListItemIcon>
                                             <SpeedIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary={`Speed: ${props.flights.features[props.flightId].properties.speed || 0} KM`} />
+                                        <ListItemText primary={`Speed: ${flight?.properties?.speed || 0} KM`} />
+                                    </ListItem>
+                                    <ListItem>
+                                        <ListItemIcon>
+                                            <ExploreIcon />
+                                        </ListItemIcon>
+                                        <ListItemText primary={`Bearings: ${flight?.properties?.bearing*-1 || 0} `} />
                                     </ListItem>
                                     <ListItem>
                                         <ListItemIcon>
                                             <LocationOnIcon />
                                         </ListItemIcon>
-                                        <ListItemText primary={`${props.flights.features[props.flightId].geometry.coordinates[0]|| 0} ${props.flights.features[props.flightId].geometry.coordinates[1]|| 0}`} />
-                                    </ListItem>
-                                    
+                                        <ListItemText primary={`${flight?.geometry?.coordinates[0] || 0} ${flight?.geometry?.coordinates[1] || 0}`} />
+                                    </ListItem> 
                                 </List>
                             </CardContent>
                         </Card>

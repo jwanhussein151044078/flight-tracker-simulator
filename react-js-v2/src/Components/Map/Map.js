@@ -1,10 +1,9 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { addFlightsToMap, addRoutesToMap, addTrailsToMap, initializeMap, removeMap, updateFlightsLocation } from '../../Services/Map/MapServices';
+import { addFlightsToMap, addRoutesLayerToMap, addRoutesToMap, addTrailsLayerToMap, addTrailsToMap, addflightsLayerToMap, animateFeatureTransition, initializeMap, removeMap, setLayerData, updateFlightsLocation } from '../../Services/Map/MapServices';
 import { connect } from 'react-redux';
-import { fetchMapState, fetchRoutesData, updateFlights } from '../../redux';
+import { fetchFlightsData, fetchMapState, fetchRoutesData, updateFlights } from '../../redux';
 import './Style.css';
 import PopUp from './PopUp';
-import { mapState } from '../../redux/initialStates';
 import Loading from '../Loading/Loading';
 
 function Map(props) {
@@ -25,59 +24,80 @@ function Map(props) {
             speed: 3,
             curve: 1,
           });
-          props.fetchRoutes();
+          addTrailsLayerToMap(map.current,'trails',(layer,error)=>{
+            if(error){
+              console.log('trail layer could not be loaded');
+            }else{
+              //props.fetchFlights();
+              
+            }
+          });
+          addRoutesLayerToMap(map.current,'routes',(layer,error)=>{
+            if(error){
+              console.log('routes layer could not be loaded');
+            }else{
+              props.fetchRoutes();
+            }
+          });
+          addflightsLayerToMap(map.current,'flights',(layer,error)=>{
+            if(error){
+              console.log('flights layer could not be loaded');
+            }else{
+              props.fetchFlights();
+              map.current.on('click', 'flights', (e) => {
+                map.current.setFilter('trails', ['==', ['get', 'flight_id'], e.features[0].id]);
+                map.current.panTo(e.features[0].geometry.coordinates);
+                setSelectedFeature( e.features[0]?.id);
+              });
+            }
+          });
+          
+          //props.fetchRoutes();
+          //props.fetchFlights();
           //addRoutesToMap(map.current,props.routes);
-          addFlightsToMap(map.current,props.flights,'flights');
-          addTrailsToMap(map.current,{
-            "type": "FeatureCollection",
-            "features": []
-          });
+          //addFlightsToMap(map.current,props.flights,'flights');
+          //addTrailsToMap(map.current,{
+          //  "type": "FeatureCollection",
+          //  "features": []
+          //});
         });
-        map.current.on('click', 'flights', (e) => {
-          map.current.flyTo({
-              center: e.features[0].geometry.coordinates
-          });
-          let ind = props.flights.features.findIndex((d)=> d.id == e.features[0].id);
-          setSelectedFeature(ind);
-
-        });
+        
       }catch(error){
         console.log(error);
       }
     }
+
     useEffect(()=>{
+      let timeout = null;
       if(props.flights){
-        updateFlightsLocation(map.current,props.flights,'flights');
+        timeout = setTimeout(()=> props.fetchFlights(),1000);
+        if(map.current){
+          animateFeatureTransition(map.current,'flights',props.flights);
+        }
       }
-    },[props.flights])
-    // useEffect(() => {
-    //     initMap();
-    //     let interval = setInterval(() => {
-    //         let flights = {...props.flights};
-    //         flights.features.forEach((feature)=>{
-    //           let path = props.routes.features.find((d)=> d.properties.id == feature.properties.path_id);
-    //           if(path && feature.properties.path_ind < path.geometry.coordinates.length){
-    //             feature.geometry.coordinates = path.geometry.coordinates[feature.properties.path_ind]
-    //           }
-    //           feature.properties.path_ind++;
-    //         });
-    //         props.updateFlights(flights);
-    //     }, 1000);
-    //     return () => {
-    //         removeMap()
-    //         if(interval){clearInterval(interval);}
-    //     };
-    // }, []);
+      return()=>{
+        if(timeout){
+          clearTimeout(timeout);
+        }
+      }
+    },[props.flights]);
+
     useEffect(()=>{
-      addRoutesToMap(map.current,props.routes);
+      setLayerData(map.current,'routes',props.routes);
     },[props.routes]);
 
     useEffect(()=>{
-      if(props.mapState && !props.mapState.loading && !props.mapState.error){
+      let timeout = null;
+      if(props.mapState.error){
+        timeout = setTimeout(()=> props.fetchMapState(),1000);
+      }else if(props.mapState && !props.mapState.loading){
         initMap();
-      } 
+      }
       return()=>{
-        removeMap()
+        removeMap();
+        if(timeout){
+          clearTimeout(timeout);
+        }
       };
     },[props.mapState]);
 
@@ -86,7 +106,7 @@ function Map(props) {
       return()=>{};
     },[]);
     return (<>
-      {!props.mapState.loading ?
+      {!props.mapState.loading && !props.mapState.error ?
         <div>
           <div className='mapContainer' ref={mapContainer} />
           <PopUp
@@ -110,9 +130,9 @@ const mapDispatchToProps = dispatch => {
   return {
     updateFlights: (flights) => dispatch(updateFlights(flights)),
     fetchMapState: ()=> dispatch(fetchMapState()),
-    fetchRoutes  : ()=> dispatch(fetchRoutesData())
+    fetchRoutes  : ()=> dispatch(fetchRoutesData()),
+    fetchFlights : ()=> dispatch(fetchFlightsData())
   };
 };
-
 
 export default connect(mapStateToProps,mapDispatchToProps)(Map);

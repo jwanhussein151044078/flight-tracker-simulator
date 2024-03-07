@@ -15,17 +15,17 @@ app.use(express.json({limit: '200mb'}));
 
 app.use('/map/specs', require('./routes/mapSpecsRoutes'));
 app.use('/routes', require('./routes/routesRoutes'));
+app.use('/flights', require('./routes/flightsRoutes'));
 
 
 app.use(errorHandler);
-
-app.listen(port, () => {
-    sequelize.authenticate()
-    .then(()=>{
+sequelize.authenticate()
+.then(()=>{
+    app.listen(port, () => {
         app.set('db',require('./models/index.js'));
         console.log(`Example app listening on port ${port}`)
         console.log('DataBase Connection Established')
-    }).catch((err)=>{
-        console.log('DataBase Connection Error ',err);
     })
+}).catch((err)=>{
+    console.log('DataBase Connection Error ',err);
 })
