@@ -3,6 +3,6 @@ import './Style.css';
 import loadingImg from '../../Assets/loading.jpg';
 export default function Loading(props) {
     return(<div className='LoadingContainer'>
-        <img src={loadingImg} />
+        <img src={loadingImg} className='loadingImg' />
     </div>);
 }

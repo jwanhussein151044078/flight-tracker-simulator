@@ -3,8 +3,12 @@
     height: 100vh;
     position: absolute;
     top:0px;
-    background: black;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.LoadingContainer .loadingImg{
+    width: calc(100vw / 4);
+    border-radius: 50%;
 }
