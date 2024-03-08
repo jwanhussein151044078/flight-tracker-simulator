@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   Card,
@@ -24,18 +24,22 @@ import { connect } from 'react-redux';
 import ExploreIcon from '@mui/icons-material/Explore';
 
 function PopUp(props){
-    const [flight,setFlight] = useState({});
+    //const [flight,setFlight] = useState({});
     const onClickClose=()=>{
         if(props.onClose){
             props.onClose();
         }
     }
-    useEffect(()=>{
-        setFlight(props.flights.features.find((flight)=> flight.properties.id == props.flightId));
-        return()=>{};
-    },[props.flightId,props.flights]);
+    const flight = useMemo(()=>{
+        return props.flights.features.find((flight)=> flight.properties.id == props.flightId);
+    },[props.flightId,props.flights])
+
+    // useEffect(()=>{
+    //     setFlight(props.flights.features.find((flight)=> flight.properties.id == props.flightId));
+    //     return()=>{};
+    // },[]);
     return (<>
-        {(props.flightId || props.flightId == 0) &&
+        {flight &&
         <Container className='popupContainer'>
             <div className="padding-20">
                 <Grid container spacing={1}>

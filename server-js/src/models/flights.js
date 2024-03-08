@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   class flights extends Model {
     static associate(models) {
       this.belongsTo(models.routes,{foreignKey:'route_id',as:'route'});
-      this.hasMany(models.trails,{foreignKey:'flight_id',as :'trail'});
+      this.hasOne(models.trails,{foreignKey:'flight_id',as :'trail'});
     }
   }
   flights.init({
@@ -16,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
     },
     route_id: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     name:{
       type: DataTypes.STRING,

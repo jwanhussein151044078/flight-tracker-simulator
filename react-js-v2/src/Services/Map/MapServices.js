@@ -1,5 +1,6 @@
 import mapboxgl from 'mapbox-gl';
 import yellow from '../../Assets/airplaneyellow.png';
+import {feature, length} from '@turf/turf';
 let MAP = null;
 export const initializeMap = (containerRef,options) => {
     if(!MAP){
@@ -83,27 +84,7 @@ export const addTrailsToMap=(map,featureCollection)=>{
     }
 }
 
-const updateTrail=(map,flight_id,point)=>{
-    try{
-        let data = {...map.getSource('trails')._data}
-        let ind = data.features.findIndex((d)=> d.properties.flight_id == flight_id);
-        if(ind>=0){
-            data.features[ind].geometry.coordinates.push(point);
-        } else{
-            data.features.push({
-                "type": "Feature",
-                "properties": {flight_id : flight_id},
-                "geometry": {
-                    "coordinates": [point],
-                    "type": "LineString"
-                }
-            })
-        }
-        map.getSource('trails').setData(data);
-    }catch(error){
-        console.log(error);
-    }
-}
+
 
 export const addFlightsToMap=(map,featureCollection,source_id = 'flights')=>{
     try{
@@ -263,7 +244,7 @@ export const addTrailsLayerToMap=(map,id,callback)=>{
         if(error){
             callback(layer,null);
         }else{
-            map.setFilter(id, ['==', ['get', 'flight_id'], 2]);
+            map.setFilter(id, ['==', ['get', 'flight_id'], null]);
             callback(null,error);
         }
     });
@@ -294,40 +275,119 @@ export const setLayerData=(map,source_id,data)=>{
     }
 }
 
-export const animateFeatureTransition=(map,source,featureCollection)=>{
+
+const updateTrail=(map,flight_id,point)=>{
+    try{
+        let data = {...map.getSource('trails')._data}
+        let ind = data.features.findIndex((d)=> d.properties.flight_id == flight_id);
+        if(ind>=0){
+            let coords = data.features[ind].geometry.coordinates[data.features[ind].geometry.coordinates.length-1];
+            if(coords[0] != point[0] || coords[0] != point[0]){
+                data.features[ind].geometry.coordinates.push(point);
+                map.getSource('trails').setData(data);
+            }
+        } else{
+            data.features.push({
+                "type": "Feature",
+                "properties": {flight_id : flight_id},
+                "geometry": {
+                    "coordinates": [point],
+                    "type": "LineString"
+                }
+            });
+            map.getSource('trails').setData(data);
+    
+        }
+    }catch(error){
+        console.log(error);
+    }
+}
+
+export const animateFeatureTransition=(map,source,featureCollection,callback)=>{
     try{
         if(map.getLayer(source)){
-            let duration = 500
-            let fps = 10;
+            let duration = 300;
+            let fps = 15;
             let oldFeatures = map.queryRenderedFeatures({layers: [source]});
             const animate=(step)=>{
-                if(step<fps){
-                    setTimeout((step)=> animate(step),duration/fps,step+1);
+                if(document.hidden){
+                    let data = {...map.getSource('trails')._data}
+                    map.getSource('trails').setData({
+                        ...data,
+                        features: featureCollection.features.map((feature)=>{
+                            let trail = data.features.find((d)=> d.properties.flight_id == feature.id);
+                            if(trail){
+                                trail.geometry.coordinates.push(feature.geometry.coordinates);
+                                return trail;
+                            }else{
+                                return{
+                                    "type": "Feature",
+                                    "properties": {flight_id : feature.id},
+                                    "geometry": {
+                                        "coordinates": [feature.geometry.coordinates],
+                                        "type": "LineString"
+                                    }
+                                }
+                            }
+                        })
+                    });
+                    map.getSource(source).setData(featureCollection);
+                    callback(true,null);
+                    return;
                 }
                 const frac = step / fps;
                 try{
                     map.getSource(source).setData({
                         ...featureCollection,
-                        features: featureCollection.features.map((feature,ind)=>{
+                        features: featureCollection.features.map((feature)=>{
+                           
                             let oldFeature = oldFeatures.find((d)=> d.id == feature.id);
                             let lng = (oldFeature? oldFeature.geometry.coordinates[0] + ((feature.geometry.coordinates[0] - oldFeature.geometry.coordinates[0]) * frac) :  feature.geometry.coordinates[0]);
                             let lat = (oldFeature? oldFeature.geometry.coordinates[1] + ((feature.geometry.coordinates[1] - oldFeature.geometry.coordinates[1]) * frac) :  feature.geometry.coordinates[1]);
-                            updateTrail(map,feature.id,[lng,lat]);
+                            //updateTrail(map,feature.id,[lng,lat]);
                             return {
                                 ...feature,
                                 geometry:{
                                     ...feature.geometry,
                                     coordinates:[lng,lat]
                                 },
-                                properties:{
-                                    ...feature.properties,
+                            }
+                        })
+                    });
+                    let data = {...map.getSource('trails')._data}
+                    map.getSource('trails').setData({
+                        ...data,
+                        features: featureCollection.features.map((feature)=>{
+                            let trail = data.features.find((d)=> d.properties.flight_id == feature.id);
+                            let oldFeature = oldFeatures.find((d)=> d.id == feature.id);
+                            let lng = (oldFeature? oldFeature.geometry.coordinates[0] + ((feature.geometry.coordinates[0] - oldFeature.geometry.coordinates[0]) * frac) :  feature.geometry.coordinates[0]);
+                            let lat = (oldFeature? oldFeature.geometry.coordinates[1] + ((feature.geometry.coordinates[1] - oldFeature.geometry.coordinates[1]) * frac) :  feature.geometry.coordinates[1]);
+                            if(trail){
+                                trail.geometry?.coordinates?.push([lng,lat]);
+                                return trail;
+                            }else{
+                                return{
+                                    "type": "Feature",
+                                    "properties": {flight_id : feature.id},
+                                    "geometry": {
+                                        "coordinates": [[lng,lat]],
+                                        "type": "LineString"
+                                    }
                                 }
                             }
                         })
                     });
                 }catch(error){
                     console.log(error);
+                    callback(null,error);
+                }finally{
+                    if(step<fps){
+                        setTimeout((step)=> animate(step),duration/fps,step+1);
+                    }else{
+                        callback(true,null);
+                    }
                 }
+
             }
             animate(0);
         }
@@ -335,5 +395,3 @@ export const animateFeatureTransition=(map,source,featureCollection)=>{
         console.log(error);
     }
 }
-
-

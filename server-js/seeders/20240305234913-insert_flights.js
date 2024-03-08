@@ -7,7 +7,7 @@ module.exports = {
     await queryInterface.bulkDelete({schema:'flight_tracker',tableName:'flights'}, null,{});
     return queryInterface.bulkInsert({schema:'flight_tracker',tableName:'flights'}, [
       {
-        id:1,
+      //  id:1,
         coordinates:'point (28.45577862214253 40.765037549402024)',
         route_id:1,
         name:'FLIGHT 1',
@@ -19,7 +19,7 @@ module.exports = {
         speed : 550.5
       },
       {
-        id:2,
+      //  id:2,
         coordinates:'point (28.45047811179981 40.69339200125887)',
         route_id:2,
         name: 'FLIGHT 2',
@@ -31,7 +31,7 @@ module.exports = {
         speed : 650.7
       },
       {
-        id:3,
+      //  id:3,
         coordinates:'point (28.994175293845046 40.68167322447897)',
         route_id:3,
         name:'FLIGHT 3',
@@ -43,7 +43,7 @@ module.exports = {
         speed : 520.1
       },
       {
-        id:4,
+      //  id:4,
         coordinates:'point (29.29358462557917 40.893832010162726)',
         route_id:4,
         name:'FLIGHT 4',
@@ -55,7 +55,7 @@ module.exports = {
         speed : 750.5
       },
       {
-        id:5,
+      //  id:5,
         coordinates:'point (28.81125692489522 40.96658218536993)',
         route_id:5,
         name:'FLIGHT 5',
@@ -67,7 +67,7 @@ module.exports = {
         speed : 750.5
       },
       {
-        id:6,
+      //  id:6,
         coordinates:'point (28.756538300258512 41.26371668232167)',
         route_id:6,
         name:'FLIGHT 6',
@@ -79,7 +79,7 @@ module.exports = {
         speed : 650.5
       },
       {
-        id:7,
+      //  id:7,
         coordinates:'point (28.72738656709771 41.26262985791013)',
         route_id:7,
         name:'FLIGHT 7',
@@ -91,7 +91,7 @@ module.exports = {
         speed : 650.5
       },
       {
-        id:8,
+      //  id:8,
         coordinates:'point (28.60140462392161 41.499454341429725)',
         route_id:8,
         name:'FLIGHT 8',
@@ -103,7 +103,7 @@ module.exports = {
         speed : 659.4
       },
       {
-        id:9,
+      //  id:9,
         coordinates:'point (28.436545719233038 41.17165790247546)',
         route_id:9,
         name:'FLIGHT 9',
@@ -115,7 +115,7 @@ module.exports = {
         speed : 659.4
       },
       {
-        id:10,
+      //  id:10,
         coordinates:'point (28.9317569539092 40.98288316213103)',
         route_id:10,
         name:'FLIGHT 10',

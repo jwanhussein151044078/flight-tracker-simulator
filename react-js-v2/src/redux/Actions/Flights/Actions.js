@@ -20,9 +20,9 @@ export const fetchFlightsData=()=>{
         axios.get('/flights')
         .then(response => {
           dispatch(fetchFlights (response.data.flights.map((flight)=> {return{
-            "id" : flight.id ,
-            "type": "Feature",
-            "properties": {
+            id : flight.id ,
+            type: "Feature",
+            properties: {
                 name : flight.name, 
                 id : flight.id ,
                 'icon-default' :'yellow-airplane',
@@ -35,7 +35,8 @@ export const fetchFlightsData=()=>{
                 speed : flight.speed,
                 bearing : flight.bearings
             },
-            "geometry": flight.coordinates
+            geometry: flight.coordinates,
+            trail: flight.trail
           }})))
         })
         .catch(error => {

@@ -10,6 +10,7 @@ function Map(props) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [selectedFeature,setSelectedFeature] = useState(null);
+    const [oldFeatures,setOldFeatures] = useState({features:[]});
     
     const initMap=()=>{
       try{
@@ -24,19 +25,19 @@ function Map(props) {
             speed: 3,
             curve: 1,
           });
+          addRoutesLayerToMap(map.current,'routes',(layer,error)=>{
+            if(error){
+              console.log('routes layer could not be loaded');
+            }else{
+              props.fetchRoutes();
+            }
+          });
           addTrailsLayerToMap(map.current,'trails',(layer,error)=>{
             if(error){
               console.log('trail layer could not be loaded');
             }else{
               //props.fetchFlights();
               
-            }
-          });
-          addRoutesLayerToMap(map.current,'routes',(layer,error)=>{
-            if(error){
-              console.log('routes layer could not be loaded');
-            }else{
-              props.fetchRoutes();
             }
           });
           addflightsLayerToMap(map.current,'flights',(layer,error)=>{
@@ -51,15 +52,6 @@ function Map(props) {
               });
             }
           });
-          
-          //props.fetchRoutes();
-          //props.fetchFlights();
-          //addRoutesToMap(map.current,props.routes);
-          //addFlightsToMap(map.current,props.flights,'flights');
-          //addTrailsToMap(map.current,{
-          //  "type": "FeatureCollection",
-          //  "features": []
-          //});
         });
         
       }catch(error){
@@ -72,7 +64,23 @@ function Map(props) {
       if(props.flights){
         timeout = setTimeout(()=> props.fetchFlights(),1000);
         if(map.current){
-          animateFeatureTransition(map.current,'flights',props.flights);
+        
+          
+          animateFeatureTransition(map.current,'flights',props.flights,(res,error)=>{
+            if(res){
+              setLayerData(map.current,'flights',props.flights);
+              setLayerData(map.current,'trails',{
+                type: 'FeatureCollection',
+                features: props.flights.features.map((flight)=>{
+                  return {
+                    type:'lineString',
+                    properties:{flight_id:flight.id},
+                    geometry:flight.trail?.trail
+                  }
+                })
+              })
+            }
+          });
         }
       }
       return()=>{
@@ -105,13 +113,17 @@ function Map(props) {
       props.fetchMapState();
       return()=>{};
     },[]);
+    const onClosePopup=()=>{
+      setSelectedFeature(null);
+      map.current.setFilter('trails', ['==', ['get', 'flight_id'], null]);
+    }
     return (<>
       {!props.mapState.loading && !props.mapState.error ?
         <div>
           <div className='mapContainer' ref={mapContainer} />
           <PopUp
             flightId = {selectedFeature}
-            onClose = {()=>setSelectedFeature(null)}
+            onClose = {onClosePopup}
           />
         </div>
         :<Loading/>
@@ -128,7 +140,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = dispatch => {
   return {
-    updateFlights: (flights) => dispatch(updateFlights(flights)),
+   // updateFlights: (flights) => dispatch(updateFlights(flights)),
     fetchMapState: ()=> dispatch(fetchMapState()),
     fetchRoutes  : ()=> dispatch(fetchRoutesData()),
     fetchFlights : ()=> dispatch(fetchFlightsData())

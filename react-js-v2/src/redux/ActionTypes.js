@@ -4,8 +4,6 @@ export const FETCH_MAP_STATE_ERROR = 'FETCH_MAP_STATE_ERROR';
 
 
 export const FETCH_ROUTES = 'FETCH_ROUTES';
-
 export const FETCH_FLIGHTS = 'FETCH_FLIGHTS';
-
 export const UPDATE_FLIGHTS = 'UPDATE_FLIGHTS';
 
