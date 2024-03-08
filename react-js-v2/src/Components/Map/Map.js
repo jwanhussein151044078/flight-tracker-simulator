@@ -6,10 +6,12 @@ import PopUp from './PopUp';
 import Loading from '../Loading/Loading';
 import { getEmptyFeatureCollection, getTrailsFeatureCollectionFromFlights } from '../../utils/geoJsonUtils';
 import './Style.css';
+import socketIO from 'socket.io-client';
 
 function Map(props) {
     const mapContainer = useRef(null);
     const map = useRef(null);
+    const socketRef = useRef(null);
     const [selectedFeature,setSelectedFeature] = useState(null);
     
     const initMap=()=>{
@@ -79,9 +81,9 @@ function Map(props) {
         timeout = setTimeout(()=> props.fetchMapState(),1000);
       }else if(props.mapState && !props.mapState.loading){
         let res = initMap();
-        interval = setInterval(()=>{
-          props.fetchFlights();
-        },1000);
+        // interval = setInterval(()=>{
+        //   props.fetchFlights();
+        // },1000);
       }
       return()=>{
         removeMap();
@@ -96,7 +98,25 @@ function Map(props) {
 
     useEffect(()=>{
       props.fetchMapState();
-      return()=>{};
+      socketRef.current = socketIO.connect('http://localhost:8000');
+      socketRef.current.on('connect', () => {
+        console.log('Connected to WebSocket server');
+      });
+
+      socketRef.current.on('disconnect', () => {
+          console.log('Disconnected from WebSocket server');
+      });
+
+      socketRef.current.on('flights', (flights) => {
+          console.log('Received message:', flights);
+          props.updateFlights(flights); 
+      });
+      return()=>{
+        console.log('adsasas');
+        if(socketRef.current){
+          socketRef.current.disconnect();
+        }
+      };
     },[]);
 
     const onClosePopup=()=>{
