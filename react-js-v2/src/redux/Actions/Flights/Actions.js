@@ -1,4 +1,5 @@
 import axios from "../../../api/axios"
+import { getFeaturesFromFlights, isEqualFeatureCollectionsWithFlights } from "../../../utils/geoJsonUtils"
 import { FETCH_FLIGHTS, UPDATE_FLIGHTS } from "../../ActionTypes"
 
 export const fetchFlights = (flights) => {
@@ -16,32 +17,26 @@ export const updateFlights=(flights)=>{
 }
 
 export const fetchFlightsData=()=>{
-    return (dispatch) => {
+    return (dispatch,getState) => {
+        let flightsState = getState().flights;
         axios.get('/flights')
         .then(response => {
-          dispatch(fetchFlights (response.data.flights.map((flight)=> {return{
-            id : flight.id ,
-            type: "Feature",
-            properties: {
-                name : flight.name, 
-                id : flight.id ,
-                'icon-default' :'yellow-airplane',
-                path_id : flight.route_id,
-                aircraft_model : flight.aircraft_model,
-                aircraft_type : flight.aircraft_type,
-                capacity : flight.capacity,
-                pilot: flight.pilot,
-                destination: flight.destination,
-                speed : flight.speed,
-                bearing : flight.bearings
-            },
-            geometry: flight.coordinates,
-            trail: flight.trail
-          }})))
+          if(!isEqualFeatureCollectionsWithFlights(flightsState,response.data.flights)){
+            dispatch(fetchFlights (getFeaturesFromFlights(response.data.flights)));
+          }
         })
         .catch(error => {
           console.log(error);
           dispatch(fetchFlights ([]));
         })
     }
+}
+
+export const updateFlightsData=(flights)=>{
+  return (dispatch,getState) => {
+    let flightsState = getState().flights;
+    if(!isEqualFeatureCollectionsWithFlights(flightsState,flights)){
+      dispatch(fetchFlights (getFeaturesFromFlights(flights)));
+    }
+  }
 }

@@ -1,16 +1,16 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
-import { addFlightsToMap, addRoutesLayerToMap, addRoutesToMap, addTrailsLayerToMap, addTrailsToMap, addflightsLayerToMap, animateFeatureTransition, initializeMap, removeMap, setLayerData, updateFlightsLocation } from '../../Services/Map/MapServices';
+import React, { useRef, useEffect, useState } from 'react';
+import { addRoutesLayerToMap, addTrailsLayerToMap, addflightsLayerToMap, animateFeatureTransition, initializeMap, removeMap, setLayerData } from '../../Services/Map/MapServices';
 import { connect } from 'react-redux';
-import { fetchFlightsData, fetchMapState, fetchRoutesData, updateFlights } from '../../redux';
-import './Style.css';
+import { fetchFlightsData, fetchMapState, fetchRoutesData, updateFlightsData } from '../../redux';
 import PopUp from './PopUp';
 import Loading from '../Loading/Loading';
+import { getEmptyFeatureCollection, getTrailsFeatureCollectionFromFlights } from '../../utils/geoJsonUtils';
+import './Style.css';
 
 function Map(props) {
     const mapContainer = useRef(null);
     const map = useRef(null);
     const [selectedFeature,setSelectedFeature] = useState(null);
-    const [oldFeatures,setOldFeatures] = useState({features:[]});
     
     const initMap=()=>{
       try{
@@ -25,26 +25,22 @@ function Map(props) {
             speed: 3,
             curve: 1,
           });
-          addRoutesLayerToMap(map.current,'routes',(layer,error)=>{
+          addRoutesLayerToMap(map.current,'routes',props.routes,(layer,error)=>{
             if(error){
               console.log('routes layer could not be loaded');
             }else{
               props.fetchRoutes();
             }
           });
-          addTrailsLayerToMap(map.current,'trails',(layer,error)=>{
+          addTrailsLayerToMap(map.current,'trails',getEmptyFeatureCollection(),(layer,error)=>{
             if(error){
               console.log('trail layer could not be loaded');
-            }else{
-              //props.fetchFlights();
-              
             }
           });
-          addflightsLayerToMap(map.current,'flights',(layer,error)=>{
+          addflightsLayerToMap(map.current,'flights',props.flights,(layer,error)=>{
             if(error){
               console.log('flights layer could not be loaded');
             }else{
-              props.fetchFlights();
               map.current.on('click', 'flights', (e) => {
                 map.current.setFilter('trails', ['==', ['get', 'flight_id'], e.features[0].id]);
                 map.current.panTo(e.features[0].geometry.coordinates);
@@ -53,41 +49,23 @@ function Map(props) {
             }
           });
         });
-        
       }catch(error){
         console.log(error);
       }
     }
 
     useEffect(()=>{
-      let timeout = null;
       if(props.flights){
-        timeout = setTimeout(()=> props.fetchFlights(),1000);
         if(map.current){
-        
-          
           animateFeatureTransition(map.current,'flights',props.flights,(res,error)=>{
             if(res){
               setLayerData(map.current,'flights',props.flights);
-              setLayerData(map.current,'trails',{
-                type: 'FeatureCollection',
-                features: props.flights.features.map((flight)=>{
-                  return {
-                    type:'lineString',
-                    properties:{flight_id:flight.id},
-                    geometry:flight.trail?.trail
-                  }
-                })
-              })
+              setLayerData(map.current,'trails',getTrailsFeatureCollectionFromFlights(props.flights));
             }
           });
         }
       }
-      return()=>{
-        if(timeout){
-          clearTimeout(timeout);
-        }
-      }
+      return()=>{};
     },[props.flights]);
 
     useEffect(()=>{
@@ -96,15 +74,22 @@ function Map(props) {
 
     useEffect(()=>{
       let timeout = null;
+      let interval = null ;
       if(props.mapState.error){
         timeout = setTimeout(()=> props.fetchMapState(),1000);
       }else if(props.mapState && !props.mapState.loading){
-        initMap();
+        let res = initMap();
+        interval = setInterval(()=>{
+          props.fetchFlights();
+        },1000);
       }
       return()=>{
         removeMap();
         if(timeout){
           clearTimeout(timeout);
+        }
+        if(interval){
+          clearInterval(interval);
         }
       };
     },[props.mapState]);
@@ -113,6 +98,7 @@ function Map(props) {
       props.fetchMapState();
       return()=>{};
     },[]);
+
     const onClosePopup=()=>{
       setSelectedFeature(null);
       map.current.setFilter('trails', ['==', ['get', 'flight_id'], null]);
@@ -140,7 +126,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = dispatch => {
   return {
-   // updateFlights: (flights) => dispatch(updateFlights(flights)),
+    updateFlights: (flights) => dispatch(updateFlightsData(flights)),
     fetchMapState: ()=> dispatch(fetchMapState()),
     fetchRoutes  : ()=> dispatch(fetchRoutesData()),
     fetchFlights : ()=> dispatch(fetchFlightsData())

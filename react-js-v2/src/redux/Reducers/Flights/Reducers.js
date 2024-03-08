@@ -7,7 +7,10 @@ const flightReducer = (state = flights , action) => {
             ...state,
             features: action.payload
         } ;
-        case UPDATE_FLIGHTS: return action.payload ;
+        case UPDATE_FLIGHTS: return {
+            ...state,
+            features:action.payload
+        } ;
         default: return state
     }
 }
