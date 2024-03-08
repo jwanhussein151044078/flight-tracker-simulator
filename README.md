@@ -38,9 +38,9 @@ Flight Tracker Simulator is a web application built to simulate real-time flight
    - In the server project main directory, create a file called `.env`.
    - Add the following environment variables to the `.env` file:
      ```
-     DB_NAME="postgres"
-     DB_USERNAME="postgres"
-     DB_PASSWORD="428997"
+     DB_NAME=""
+     DB_USERNAME=""
+     DB_PASSWORD=""
      DB_HOST="127.0.0.1"
      DB_PORT="5432"
      ```
