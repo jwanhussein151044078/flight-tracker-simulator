@@ -15,10 +15,12 @@ module.exports = {
       flight_id: {
         type: DataTypes.INTEGER,
         allowNull: false,
+        unique: true,
         references: {
             model: 'flights',
             key: 'id'
-        }
+        },
+        onDelete: 'CASCADE'
       },
     },{schema:'flight_tracker'});
   },

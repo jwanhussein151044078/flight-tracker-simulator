@@ -317,7 +317,7 @@ export const animateFeatureTransition=(map,source,featureCollection,callback)=>{
                         features: featureCollection.features.map((feature)=>{
                             let trail = data.features.find((d)=> d.properties.flight_id == feature.id);
                             if(trail){
-                                trail.geometry.coordinates.push(feature.geometry.coordinates);
+                                trail.geometry?.coordinates.push(feature.geometry.coordinates);
                                 return trail;
                             }else{
                                 return{
