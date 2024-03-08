@@ -47,8 +47,15 @@ Flight Tracker Simulator is a web application built to simulate real-time flight
 6. Run migrations to create tables: `cd server && npx sequelize-cli db:migrate`.
 7. Run seeders to populate initial data: `cd server && npx sequelize-cli db:seed:all`.
 8. Start the backend server: `cd server && node src/index.js`
-9. Start the frontend development server: `cd react-js-v2 && npm start`
-10. Access the application in your web browser at `http://localhost:3000`.
+9. **Before running the frontend app**:
+   - In the frontend project main directory, create a file called `.env`.
+   - Inside the `.env` file, declare a variable called `REACT_APP_MAPBOX_TOKEN` and set its value to your Mapbox access token.
+     Example:
+     ```
+     REACT_APP_MAPBOX_TOKEN=your-mapbox-token
+     ```
+10. Start the frontend development server: `cd react-js-v2 && npm start`
+11. Access the application in your web browser at `http://localhost:3000`.
 
 ## Contributors
 
