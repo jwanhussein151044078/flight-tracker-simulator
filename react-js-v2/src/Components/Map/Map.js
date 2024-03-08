@@ -98,7 +98,7 @@ function Map(props) {
 
     useEffect(()=>{
       props.fetchMapState();
-      socketRef.current = socketIO.connect('http://localhost:8000');
+      socketRef.current = socketIO.connect('http://localhost:8001');
       socketRef.current.on('connect', () => {
         console.log('Connected to WebSocket server');
       });
@@ -108,7 +108,6 @@ function Map(props) {
       });
 
       socketRef.current.on('flights', (flights) => {
-          console.log('Received message:', flights);
           props.updateFlights(flights); 
       });
       return()=>{
