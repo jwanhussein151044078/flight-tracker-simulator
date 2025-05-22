@@ -1,42 +1,62 @@
-# Real-Time Flight Tracker with Mapbox GL JS 
+# Flight Tracker Simulator
 
-This project is a real-time flight tracker built using Mapbox GL JS. It displays the current positions of 10 flights on a map and updates their coordinates in real-time as they move.
+Flight Tracker Simulator is a web application built to simulate real-time flight tracking using React for the frontend, Node.js Express server for the backend, Socket.IO for real-time communication, and a RESTful API for data retrieval. The project utilizes a PostgreSQL database with the PostGIS extension to store spatial data.
 
-## Table of Contents
+## Technologies Used
 
-- [Description](#description)
-- [Features](#features)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Screenshots](#screenshots)
+- **Frontend**:
+  - React: JavaScript library for building user interfaces.
+  - Socket.IO Client: WebSocket library for real-time communication between the frontend and backend.
+  - Axios: Promise-based HTTP client for making requests to the backend RESTful API.
+  - Mapbox: Interactive mapping platform for visualizing flight paths and geographical data.
 
-## Description
-
-The Real-Time Flight Tracker utilizes the Mapbox GL JS library to set up an interactive map interface. It fetches real-time flight coordinates from a data source and displays the current positions of 10 flights on the map.
+- **Backend**:
+  - Node.js: JavaScript runtime for building server-side applications.
+  - Express.js: Web application framework for Node.js, used for building RESTful APIs.
+  - Socket.IO: Real-time engine for bi-directional communication between clients and server.
+  - PostgreSQL: Open-source relational database management system.
+  - PostGIS: Spatial database extender for PostgreSQL, used for storing and querying geographic data.
+  - Sequelize : Promise-based Node.js ORM for relational databases, used for simplifying database operations and managing database models.
 
 ## Features
 
-- Displays an interactive map using Mapbox GL JS.
-- Real-time tracking of 10 flights.
-- Updates flight positions dynamically as they move.
-- Provides an intuitive and user-friendly interface for tracking flights.
+- Real-time Flight Tracking: Simulates real-time flight tracking by updating flight positions on the map in real-time.
+- Interactive Map Interface: Provides an interactive map interface powered by Mapbox for users to visualize flight paths and trails data.
+- RESTful API: Exposes RESTful endpoints for retrieving flight data and other relevant information.
+- WebSocket Communication: Uses WebSocket communication through Socket.IO for real-time updates.
+- PostgreSQL Database: Stores flight , pathes and trails data using the PostgreSQL database with the PostGIS extension.
 
-## Installation
+## Setup Instructions
 
-1. Clone the repository: `git clone https://github.com/jwanhussein151044078/flight-tracker-simulator.git`
-2. Navigate to the project directory: `cd <project-folder>`
-3. Obtain an access token from the [Mapbox website](https://www.mapbox.com/).
-4. Create a `.env` file in the root directory of the project.
-5. Add a variable called `REACT_APP_MAPBOX_TOKEN` to the `.env` file and set its value to your Mapbox access token. Example: `REACT_APP_MAPBOX_TOKEN=<your-access-token>`
-6. Install dependencies: `npm install` 
+1. Clone the repository: `git clone https://github.com/your-username/flight-tracker-simulator.git`
+2. Install dependencies for frontend and backend:
+   - Frontend: `cd react-js-v2 && npm install`
+   - Backend: `cd server && npm install`
+3. Set up the PostgreSQL database with the PostGIS extension.
+4. Create a new schema named `flight_tracker` in your PostgreSQL database.
+5. **Configure the database connection in the backend**:
+   - In the server project main directory, create a file called `.env`.
+   - Add the following environment variables to the `.env` file:
+     ```
+     DB_NAME=""
+     DB_USERNAME=""
+     DB_PASSWORD=""
+     DB_HOST="127.0.0.1"
+     DB_PORT="5432"
+     ```
+6. Run migrations to create tables: `cd server && npx sequelize-cli db:migrate`.
+7. Run seeders to populate initial data: `cd server && npx sequelize-cli db:seed:all`.
+8. Start the backend server: `cd server && node src/index.js`
+9. **Before running the frontend app**:
+   - In the frontend project main directory, create a file called `.env`.
+   - Inside the `.env` file, declare a variable called `REACT_APP_MAPBOX_TOKEN` and set its value to your Mapbox access token.
+     Example:
+     ```
+     REACT_APP_MAPBOX_TOKEN=your-mapbox-token
+     ```
+10. Start the frontend development server: `cd react-js-v2 && npm start`
+11. Access the application in your web browser at `http://localhost:3000`.
 
-## Usage
+## Contributors
 
-1. Start the development server: `npm start`
-2. Open your browser and navigate to `http://localhost:3000`
-
-
-## Screenshots
-
-![Screenshot (2)](https://github.com/jwanhussein151044078/flight-tracker-simulator/assets/32716340/ab6e3392-f70e-4b00-8f86-8134d49f9248)
-![Screenshot (6)](https://github.com/jwanhussein151044078/flight-tracker-simulator/assets/32716340/0411fb74-94bc-4a8d-8dd2-1b8ad0500c67)
+- [Jvan Hussein]([https://github.com/your-username](https://github.com/jwanhussein151044078))

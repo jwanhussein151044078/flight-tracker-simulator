@@ -1,76 +1,139 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { addFlightsToMap, addRoutesToMap, addTrailsToMap, initializeMap, removeMap, updateFlightsLocation } from '../../Services/Map/MapServices';
+import { addRoutesLayerToMap, addTrailsLayerToMap, addflightsLayerToMap, animateFeatureTransition, initializeMap, removeMap, setLayerData } from '../../Services/Map/MapServices';
 import { connect } from 'react-redux';
-import { updateFlights } from '../../redux';
-import './Style.css';
+import { fetchFlightsData, fetchMapState, fetchRoutesData, updateFlightsData } from '../../redux';
 import PopUp from './PopUp';
+import Loading from '../Loading/Loading';
+import { getEmptyFeatureCollection, getTrailsFeatureCollectionFromFlights } from '../../utils/geoJsonUtils';
+import './Style.css';
+import socketIO from 'socket.io-client';
 
 function Map(props) {
     const mapContainer = useRef(null);
     const map = useRef(null);
+    const socketRef = useRef(null);
     const [selectedFeature,setSelectedFeature] = useState(null);
+    
     const initMap=()=>{
       try{
         map.current = initializeMap(mapContainer,{
-          style : props.mapState.style,
+          style : props.mapState.mapSpecs.style,
           accessToken:process.env.REACT_APP_MAPBOX_TOKEN
         });
         map.current.on('load',()=>{
           map.current.flyTo({
-            center: props.mapState.center,
-            zoom: props.mapState.zoom,
+            center: props.mapState.mapSpecs.center.coordinates,
+            zoom: props.mapState.mapSpecs.zoom,
             speed: 3,
             curve: 1,
           });
-          addRoutesToMap(map.current,props.routes);
-          addFlightsToMap(map.current,props.flights,'flights');
-          addTrailsToMap(map.current,{
-            "type": "FeatureCollection",
-            "features": []
+          addRoutesLayerToMap(map.current,'routes',props.routes,(layer,error)=>{
+            if(error){
+              console.log('routes layer could not be loaded');
+            }else{
+              props.fetchRoutes();
+            }
           });
-        });
-        map.current.on('click', 'flights', (e) => {
-          map.current.flyTo({
-              center: e.features[0].geometry.coordinates
+          addTrailsLayerToMap(map.current,'trails',getEmptyFeatureCollection(),(layer,error)=>{
+            if(error){
+              console.log('trail layer could not be loaded');
+            }
           });
-          let ind = props.flights.features.findIndex((d)=> d.id == e.features[0].id);
-          setSelectedFeature(ind);
-
+          addflightsLayerToMap(map.current,'flights',props.flights,(layer,error)=>{
+            if(error){
+              console.log('flights layer could not be loaded');
+            }else{
+              map.current.on('click', 'flights', (e) => {
+                map.current.setFilter('trails', ['==', ['get', 'flight_id'], e.features[0].id]);
+                map.current.panTo(e.features[0].geometry.coordinates);
+                setSelectedFeature( e.features[0]?.id);
+              });
+            }
+          });
         });
       }catch(error){
         console.log(error);
       }
     }
+
     useEffect(()=>{
       if(props.flights){
-        updateFlightsLocation(map.current,props.flights,'flights');
+        if(map.current){
+          animateFeatureTransition(map.current,'flights',props.flights,(res,error)=>{
+            if(res){
+              setLayerData(map.current,'flights',props.flights);
+              setLayerData(map.current,'trails',getTrailsFeatureCollectionFromFlights(props.flights));
+            }
+          });
+        }
       }
-    },[props.flights])
-    useEffect(() => {
-        initMap();
-        let interval = setInterval(() => {
-            let flights = {...props.flights};
-            flights.features.forEach((feature)=>{
-              let path = props.routes.features.find((d)=> d.properties.id == feature.properties.path_id);
-              if(path && feature.properties.path_ind < path.geometry.coordinates.length){
-                feature.geometry.coordinates = path.geometry.coordinates[feature.properties.path_ind]
-              }
-              feature.properties.path_ind++;
-            });
-            props.updateFlights(flights);
-        }, 1000);
-        return () => {
-            removeMap()
-            if(interval){clearInterval(interval);}
-        };
-    }, []);
-    return (<div style={{overflow:'hidden'}}>
-      <div className='mapContainer' ref={mapContainer} />
-      <PopUp
-        flightId = {selectedFeature}
-        onClose = {()=>setSelectedFeature(null)}
-      />  
-    </div>);
+      return()=>{};
+    },[props.flights]);
+
+    useEffect(()=>{
+      setLayerData(map.current,'routes',props.routes);
+    },[props.routes]);
+
+    useEffect(()=>{
+      let timeout = null;
+      let interval = null ;
+      if(props.mapState.error){
+        timeout = setTimeout(()=> props.fetchMapState(),1000);
+      }else if(props.mapState && !props.mapState.loading){
+        let res = initMap();
+        // interval = setInterval(()=>{
+        //   props.fetchFlights();
+        // },1000);
+      }
+      return()=>{
+        removeMap();
+        if(timeout){
+          clearTimeout(timeout);
+        }
+        if(interval){
+          clearInterval(interval);
+        }
+      };
+    },[props.mapState]);
+
+    useEffect(()=>{
+      props.fetchMapState();
+      socketRef.current = socketIO.connect('http://localhost:8001');
+      socketRef.current.on('connect', () => {
+        console.log('Connected to WebSocket server');
+      });
+
+      socketRef.current.on('disconnect', () => {
+          console.log('Disconnected from WebSocket server');
+      });
+
+      socketRef.current.on('flights', (flights) => {
+          props.updateFlights(flights); 
+      });
+      return()=>{
+        console.log('adsasas');
+        if(socketRef.current){
+          socketRef.current.disconnect();
+        }
+      };
+    },[]);
+
+    const onClosePopup=()=>{
+      setSelectedFeature(null);
+      map.current.setFilter('trails', ['==', ['get', 'flight_id'], null]);
+    }
+    return (<>
+      {!props.mapState.loading && !props.mapState.error ?
+        <div>
+          <div className='mapContainer' ref={mapContainer} />
+          <PopUp
+            flightId = {selectedFeature}
+            onClose = {onClosePopup}
+          />
+        </div>
+        :<Loading/>
+      }  
+    </>);
 }
 
 const mapStateToProps = (state) => {
@@ -82,9 +145,11 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = dispatch => {
   return {
-    updateFlights: (flights) => {dispatch(updateFlights(flights))},
+    updateFlights: (flights) => dispatch(updateFlightsData(flights)),
+    fetchMapState: ()=> dispatch(fetchMapState()),
+    fetchRoutes  : ()=> dispatch(fetchRoutesData()),
+    fetchFlights : ()=> dispatch(fetchFlightsData())
   };
 };
-
 
 export default connect(mapStateToProps,mapDispatchToProps)(Map);
